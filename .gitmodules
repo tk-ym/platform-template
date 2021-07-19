@@ -1,0 +1,3 @@
+[submodule "django/app"]
+	path = django/app
+	url = git@github.com:Takayuki-Yamamoto/django-project-template.git

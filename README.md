@@ -1,1 +1,1 @@
-# management-system-platform
+# django-platform-platform

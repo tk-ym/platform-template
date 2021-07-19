@@ -1,0 +1,54 @@
+version: "3"
+
+services:
+  app:
+    environment:
+      DJANGO_ENV: production
+    expose:
+      - "8001"
+    volumes:
+      - ./django/uwsgi.ini:/opt/app/uwsgi.ini
+      - ./nginx/www/app/static:/var/www/app/static
+      - ./nginx/www/app/media:/var/www/app/media
+    command: uwsgi --socket :8001 --module config.wsgi --env DJANGO_SETTINGS_MODULE=config.settings.production
+
+  db:
+    image: mysql:8
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - ./db/conf/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      - ./db/sql:/docker-entrypoint-initdb.d
+      - ./db/data/:/var/lib/mysql
+    restart: always
+    environment:
+      TZ: Asia/Tokyo
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: management
+      MYSQL_USER: django
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
+      DB_HOST: "${DB_HOST}"
+      DB_PORT: "${DB_PORT}"
+    networks:
+      - service-net
+
+  web:
+    image: nginx:stable
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf:/etc/nginx/conf.d
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/uwsgi_params:/etc/nginx/uwsgi_params
+      - ./nginx/www/app/static:/var/www/app/static
+      - ./nginx/www/app/media:/var/www/app/media
+    environment:
+      TZ: Asia/Tokyo
+      LANG: ja_JP.UTF-8
+      LANGUAGE: ja_JP:ja
+      LC_ALL: ja_JP.UTF-8
+    depends_on:
+      - app
+      - db
+    networks:
+      - service-net
+    command: nginx -g 'daemon off;'

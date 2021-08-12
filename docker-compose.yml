@@ -1,8 +1,8 @@
 version: "3"
 
 services:
-  app:
-    container_name: app
+  backend:
+    container_name: backend
     build:
       context: ./django
     environment:
@@ -13,6 +13,15 @@ services:
       - service-net
     command:
       bash -c "python manage.py runserver 0.0.0.0:8000"
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./nextjs
+    networks:
+      - service-net
+    restart: always
+    command: pm2-runtime start npm -- start
 
 networks:
   service-net:

@@ -1,3 +1,6 @@
 [submodule "django/app"]
 	path = django/app
 	url = git@github.com:Takayuki-Yamamoto/django-project-template.git
+[submodule "nextjs/app"]
+	path = nextjs/app
+	url = git@github.com:Takayuki-Yamamoto/nextjs-template.git

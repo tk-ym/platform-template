@@ -1,1 +1,1 @@
-# django-platform-template
+# Platform-template

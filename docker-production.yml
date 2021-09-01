@@ -56,3 +56,76 @@ services:
     networks:
       - service-net
     command: nginx -g 'daemon off;'
+
+  elasticsearch:
+    container_name: elastic1
+    build:
+      context: elk/elasticsearch
+    hostname: doc-elastic101
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 2G
+    networks:
+      service-net:
+        ipv4_address: 172.60.0.2
+    volumes:
+#      - ./elk/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    extra_hosts:
+      - "doc-kibana101:172.60.0.4"
+      - "doc-logstash101:172.60.0.3"
+
+  logstash:
+    build:
+      context: elk/logstash/
+    container_name: logstash1
+    hostname: doc-logstash101
+    ports:
+      #      - "5043-5100:5043-5100/tcp"
+      - "5043:5043/tcp"
+    #    deploy:
+    #      resources:
+    #        limits:
+    #          memory: 1G
+    networks:
+      service-net:
+        ipv4_address: 172.60.0.3
+    extra_hosts:
+      - "doc-elastic101:172.60.0.2"
+      - "doc-kibana101:172.60.0.4"
+    environment:
+      LS_JAVA_OPTS: "-Xmx512m -Xms512m"
+    volumes:
+      - ./elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+  #    depends_on:
+  #      - elasticsearch
+
+  kibana:
+    build:
+      context: elk/kibana/
+    hostname: doc-kibana101
+    container_name: kibana1
+    ports:
+      - "5601:5601"
+    #    deploy:
+    #      resources:
+    #        limits:
+    #          memory: 512M
+    networks:
+      service-net:
+        ipv4_address: 172.60.0.4
+    volumes:
+      - ./elk/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml
+    extra_hosts:
+      - "doc-elastic101:172.60.0.2"
+      - "doc-logstash101:172.60.0.3"
+    depends_on:
+      - elasticsearch
+
+volumes:
+  elasticsearch-data:
+    driver: local

@@ -140,6 +140,9 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+.DS_Store
+
 .env
 .idea/
 docker-compose.env
+db/data/

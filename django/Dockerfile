@@ -6,6 +6,7 @@ RUN apt-get install -y postgresql-client
 RUN pip install --upgrade pip
 
 ADD ./app /opt/app
+COPY ./uwsgi.ini /opt
 WORKDIR /opt/app
 
 RUN pip install -r requirements/base.txt

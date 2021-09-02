@@ -45,6 +45,7 @@ services:
       - ./nginx/uwsgi_params:/etc/nginx/uwsgi_params
       - ./nginx/www/app/static:/var/www/app/static
       - ./nginx/www/app/media:/var/www/app/media
+      - ./nginx/data/log:/var/log/nginx
     environment:
       TZ: Asia/Tokyo
       LANG: ja_JP.UTF-8
@@ -73,7 +74,7 @@ services:
       service-net:
         ipv4_address: 172.60.0.2
     volumes:
-#      - ./elk/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./elk/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
       - elasticsearch-data:/usr/share/elasticsearch/data
     extra_hosts:
       - "doc-kibana101:172.60.0.4"
@@ -100,9 +101,11 @@ services:
     environment:
       LS_JAVA_OPTS: "-Xmx512m -Xms512m"
     volumes:
-      - ./elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
-  #    depends_on:
-  #      - elasticsearch
+       - ./elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+       - ./elk/logstash/pipeline/:/usr/share/logstash/pipeline:ro
+       - ./nginx/data/log/:/var/log/nginx/
+    depends_on:
+       - elasticsearch
 
   kibana:
     build:
@@ -119,7 +122,7 @@ services:
       service-net:
         ipv4_address: 172.60.0.4
     volumes:
-      - ./elk/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml
+      - ./elk/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
     extra_hosts:
       - "doc-elastic101:172.60.0.2"
       - "doc-logstash101:172.60.0.3"
